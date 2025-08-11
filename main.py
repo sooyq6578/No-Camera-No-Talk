@@ -12,6 +12,7 @@ chan = None
 chat_lounge = None
 # read keys from .env file
 env_path = sys.path[1] + "\\etc\\secrets\\.env"
+print(env_path)
 load_dotenv(dotenv_path=env_path)
             
 channel_id = os.environ["CHANNEL_ID"]
