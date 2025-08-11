@@ -1,23 +1,28 @@
 import discord
 from discord.ext import commands
 import os
-from keep_alive import keep_alive
+from dotenv import load_dotenv, set_key
+import sys
+# from keep_alive import keep_alive
 
 intent = discord.Intents.all()
 bot = commands.Bot(command_prefix='$', help_command=None, intents=intent)
 guild = None
 chan = None
 chat_lounge = None
-f = open("vars.txt", "r")
-arr = f.readlines()  # 0 is toggle, 1 is channel
-f.close()
+# read keys from .env file
+env_path = sys.path[1] + "\\etc\\secrets\\.env"
+load_dotenv(dotenv_path=env_path)
+            
+channel_id = os.environ["CHANNEL_ID"]
+is_active = os.environ["IS_ACTIVE"]
 
 @bot.event
 async def on_ready():
     global guild, chan, chat_lounge
     print('We have logged in as {0.user}'.format(bot))
     guild = bot.guilds[0]
-    chan = guild.get_channel(int(arr[1]))
+    chan = guild.get_channel(int(channel_id))
     chat_lounge = guild.get_channel(914110047859118080)
 
 @bot.command(name="desc")
@@ -45,15 +50,11 @@ async def set(ctx, channel_id):
       return
 
     try:
-        global chan, arr
+        global chan
         channel_id = int(channel_id.translate({ord(i): None for i in '<#>'}))
         channel = guild.get_channel(channel_id)
         bit = channel.bitrate
-        arr[1] = str(channel_id)
-        f = open("vars.txt", "w")
-        for x in arr:
-          f.write(x)
-        f.close()
+        set_key(dotenv_path=env_path, key_to_set="CHANNEL_ID", value_to_set=str(channel_id))
         chan = channel
         await ctx.channel.send("No Camera No Talk channel set to {}".format(chan.mention))
     except Exception as e:
@@ -71,18 +72,12 @@ async def toggle(ctx):
     await ctx.channel.send("Only administrators can use this command.")
     return
 
-  global arr
-  flag = arr[0]
-  if flag == "True\n":
-    arr[0] = "False\n"
+  if is_active == "True":
+    set_key(dotenv_path=env_path, key_to_set="IS_ACTIVE", value_to_set="False")
     await ctx.channel.send("Rule is **disabled**.")
   else:
-    arr[0] = "True\n"
+    set_key(dotenv_path=env_path, key_to_set="IS_ACTIVE", value_to_set="True")
     await ctx.channel.send("Rule is **enabled**.")
-  f = open("vars.txt", "w")
-  for x in arr:
-    f.write(x)
-  f.close()
 
 @bot.command(name="help")
 async def help(ctx):
@@ -97,8 +92,7 @@ async def status(ctx):
   if ctx.channel != chat_lounge:
     await ctx.channel.send("Use commands in {} please.".format(chat_lounge.mention))
     return
-  status = arr[0]
-  if status == "True\n":
+  if is_active == "True":
     flag = "**enabled**"
   else:
     flag = "**disabled**"
@@ -113,7 +107,7 @@ async def set_unmute(member):
 
 @bot.event
 async def on_voice_state_update(member, before, after):
-    if after.channel and arr[0] == "True\n":
+    if after.channel and is_active == "True":
         if member.bot or (member.voice.mute and not member.voice.self_video and after.channel.id == chan.id)\
                 or (not member.voice.mute and member.voice.self_video and after.channel.id == chan.id):
             return
@@ -130,5 +124,5 @@ async def on_voice_state_update(member, before, after):
             await set_unmute(member)
 
 
-keep_alive()
+# keep_alive()
 bot.run(os.environ['TOKEN'])
