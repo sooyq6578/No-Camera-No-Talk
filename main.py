@@ -11,8 +11,8 @@ guild = None
 chan = None
 chat_lounge = None
 # read keys from .env file
-env_path = sys.path[1] + "/etc/secrets/.env"
-load_dotenv(dotenv_path=env_path)
+# env_path = sys.path[1] + "/etc/secrets/.env"
+load_dotenv()
 print(os.environ)
             
 channel_id = os.environ["CHANNEL_ID"]
