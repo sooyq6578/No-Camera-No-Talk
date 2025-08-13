@@ -3,7 +3,7 @@ from discord.ext import commands
 import os
 from dotenv import load_dotenv, set_key
 import sys
-# from keep_alive import keep_alive
+from keep_alive import keep_alive
 
 intent = discord.Intents.all()
 bot = commands.Bot(command_prefix='$', help_command=None, intents=intent)
