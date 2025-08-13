@@ -125,5 +125,5 @@ async def on_voice_state_update(member, before, after):
             await set_unmute(member)
 
 
-# keep_alive()
+keep_alive()
 bot.run(os.environ['TOKEN'])
